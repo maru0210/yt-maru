@@ -2,7 +2,6 @@ import { lucia } from "../../lib/auth";
 import { verify } from "@node-rs/argon2";
 import { db } from "../../lib/db";
 
-import type { DatabaseUser } from "../../lib/db";
 import type { APIContext } from "astro";
 
 export async function POST(context: APIContext): Promise<Response> {
@@ -29,9 +28,9 @@ export async function POST(context: APIContext): Promise<Response> {
         });
     }
 
-    const existingUser = db
-        .prepare("SELECT * FROM user WHERE username = ?")
-        .get(username) as DatabaseUser | undefined;
+    const existingUser = await db.user.findUnique({
+        where: { username: username },
+    });
     if (!existingUser) {
         return new Response(
             JSON.stringify({

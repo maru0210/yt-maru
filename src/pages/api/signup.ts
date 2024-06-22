@@ -2,7 +2,7 @@ import { lucia } from "../../lib/auth";
 import { generateId } from "lucia";
 import { hash } from "@node-rs/argon2";
 import { db } from "../../lib/db";
-import { SqliteError } from "better-sqlite3";
+import { Prisma } from "@prisma/client";
 
 import type { APIContext } from "astro";
 
@@ -51,9 +51,13 @@ export async function POST(context: APIContext): Promise<Response> {
     const userId = generateId(15);
 
     try {
-        db.prepare(
-            "INSERT INTO user (id, username, password_hash) VALUES(?, ?, ?)",
-        ).run(userId, username, passwordHash);
+        await db.user.create({
+            data: {
+                id: userId,
+                username: username,
+                password_hash: passwordHash
+            }
+        })
 
         const session = await lucia.createSession(userId, {});
         const sessionCookie = lucia.createSessionCookie(session.id);
@@ -65,7 +69,7 @@ export async function POST(context: APIContext): Promise<Response> {
 
         return new Response();
     } catch (e) {
-        if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code == "P2002") {
             return new Response(
                 JSON.stringify({
                     error: "Username already used",

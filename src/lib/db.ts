@@ -1,19 +1,6 @@
-import sqlite from "better-sqlite3";
+import { PrismaClient } from "@prisma/client";
 
-export const db = sqlite("account.db");
-
-db.exec(`CREATE TABLE IF NOT EXISTS user (
-        id TEXT NOT NULL PRIMARY KEY,
-        username TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL
-    )`);
-
-db.exec(`CREATE TABLE IF NOT EXISTS session (
-        id TEXT NOT NULL PRIMARY KEY,
-        expires_at INTEGER NOT NULL,
-        user_id TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES user(id)
-    )`);
+export const db = new PrismaClient();
 
 export interface DatabaseUser {
     id: string;

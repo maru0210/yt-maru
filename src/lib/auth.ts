@@ -1,13 +1,10 @@
 import { Lucia } from "lucia";
-import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
+import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
 import { db } from "./db";
 
 import type { DatabaseUser } from "./db";
 
-const adapter = new BetterSqlite3Adapter(db, {
-    user: "user",
-    session: "session"
-});
+const adapter = new PrismaAdapter(db.session, db.user)
 
 export const lucia = new Lucia(adapter, {
     sessionCookie: {
